@@ -44,4 +44,69 @@ def test_read_csv_assertion_error(spark_session,
                             header_flag = "abc",
                             infer_schema = "xyz"
                         )
-    assert "infer_schema and header_flag parameter can only take true and flase as its " in str(exception_info.value)
+    assert exception_info.value.args[0] == "infer_schema and header_flag parameter can only take true and flase as its value"
+
+def test_read_csv_header(spark_session,
+                         csv_file
+                         ):
+    df_actual = read_data_from_csv(sparksession = spark_session, path = csv_file, header_flag = "true")
+    df_data = [
+        ("Instagram", "SOCIAL", 4.3)
+    ]
+
+    df_schema = StructType([
+        StructField("App", StringType(), True),
+        StructField("Category", StringType(), True),
+        StructField("Rating", StringType(), True)
+    ])
+    df_expected = spark_session.createDataFrame(data = df_data, schema = df_schema)
+
+    assertDataFrameEqual(df_actual, df_expected)
+
+
+def test_read_csv_infer_schema(spark_session,
+                               csv_file
+                               ):
+    df_actual = read_data_from_csv(sparksession = spark_session, 
+                                   path = csv_file,
+                                   header_flag = "true",
+                                   infer_schema = "true")
+    
+    df_data = [
+        ("Instagram", "SOCIAL", 4.3)
+    ]
+
+    df_schema = StructType([
+        StructField("App", StringType(), True),
+        StructField("Category", StringType(), True),
+        StructField("Rating", DoubleType(), True)
+    ])
+    df_expected = spark_session.createDataFrame(data = df_data, schema = df_schema)
+
+    assertDataFrameEqual(df_actual, df_expected)
+
+
+def test_read_csv_custom_schema(spark_session,
+                                csv_file
+                                ):
+    custom_schema = StructType([
+        StructField("App", StringType(), True),
+        StructField("Category", StringType(), True),
+        StructField("Rating", StringType(), True)
+    ])
+
+    df_schema = custom_schema
+    
+    df_actual = read_data_from_csv(sparksession = spark_session, 
+                                   path = csv_file,
+                                   header_flag = "true",
+                                   infer_schema = "true",
+                                   custom_schema = custom_schema)
+    
+    df_data = [
+        ("Instagram", "SOCIAL", 4.3)
+    ]
+
+    df_expected = spark_session.createDataFrame(data = df_data, schema = df_schema)
+
+    assertDataFrameEqual(df_actual, df_expected)

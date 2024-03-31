@@ -11,6 +11,15 @@ def read_data_from_csv(sparksession,
                     ):
     """
     This function reads a csv file from the path specified with the necessary modifications
+    Params:
+        sparksession : spark session
+        path : path of the file to read, csv in this case
+        header_flag : true / false depending on if the first row is to be treated as header or not
+        infer_schema : true / false depending on whether schema should be automatically detected on read
+        custom_schema : parameter to pass custom schema to the csv reader
+    
+    output:
+        df : csv file as a dataframe
     """
     assert infer_schema in ["true", "false"] and header_flag in ["true", "false"], \
         "infer_schema and header_flag parameter can only take true and flase as its value"
@@ -37,6 +46,18 @@ def clean_data(sparksession,
                df,
                drop_columns_list: List = []
             ):
+    """
+    This function is responsible for cleaning of the passed dataframe.
+    Cleaning operation includes dropping passed columns, and converting some of the columns to correct data types
+
+    Params:
+        sparksession : spark session
+        df : dataframe to operate on
+        drop_columns : list of columns to be dropped from the passed dataframe
+
+    Output:
+        df : dataframe obtained after all the operations
+    """
     df = df.drop(*drop_columns_list) \
         .withColumn("Reviews", F.col("Reviews").cast(IntegerType())) \
         .withColumn("Installs", F.regexp_replace(F.col("Installs"), "[^0-9]", "")) \
